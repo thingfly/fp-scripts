@@ -1,10 +1,16 @@
-$Source = "source"
-$Destination = "destination"
+$source = "source"
+$destination = "output"
 
-$files = Get-ChildItem -Path $Source -Force  | Select-Object FullName
-$directories = Get-ChildItem -Path Destination -Recurse -Directory | Select-Object FullName
+# Make new directories from the clipboard
+Get-Clipboard | New-Item -Force -Path $Destination -Name {$_} -ItemType "directory" | Out-Null
 
-Foreach ($directory in $directories)
-{    
-    Copy-item -Force -Recurse -Verbose $files.FullName   -Destination $directory.FullName
+# Get source files
+$sourceFiles = Get-ChildItem -Path $source -Force
+
+# Get destination directories
+$directories = Get-ChildItem -Path $destination -Recurse -Directory
+
+# Copy and rename source files
+Foreach ($directory in $directories) {
+    $sourceFiles | Copy-Item -Destination {$directory.FullName + "\" + $directory.Name + $_.Name}
 }
